@@ -1,0 +1,56 @@
+@startuml
+
+package adapter.kafka {
+
+    interface Encoder<I, O> {
+        +encode(input: I): Optional<O>
+        +underlyingKafkaSerializer(): Class<? extends Serializer<O>>
+    }
+
+    interface Decoder<I, O> {
+        +decode(input: I): Optional<O>
+        +underlyingKafkaDeserializer(): Class<? extends Deserializer<I>>
+    }
+
+    interface Codec<I, O>
+
+    Codec <|-- Encoder : <I, O>
+    Codec <|-- Decoder : <O, I>
+
+    class Producer<I, O> {
+        +log(topic: String, message: I): void
+    }
+
+    Producer ..> Encoder
+
+    class Consumer<I, O> {
+        +isRunning(): boolean
+        +run(): void
+        +stop(): void
+    }
+
+    Consumer ..> Decoder
+    Consumer ..|> Runnable
+
+    interface Processor<MessageType> {
+        +process(message: MessageType): CompletableFuture<Void>
+    }
+
+    Consumer ..> Processor : O = MessageType
+}
+
+package application {
+
+    class MyMessage
+
+    class JsonCodec<MyMessage>
+
+    JsonCodec --|> Codec : <MyMessage, String>
+
+    class MyProcessor<MyMessage>
+
+    MyProcessor --|> Processor : MessageType = MyMessage
+    MyProcessor ..> MyMessage
+}
+
+@enduml
