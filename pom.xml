@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -21,12 +22,14 @@
 
     <modules>
         <module>kafkasampler-kafka-adapter</module>
+        <module>kafkasampler-kafka-clients</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- versions -->
         <kafka.version>0.10.1.1</kafka.version>
+        <zk.version>0.10</zk.version>
         <lombok.version>1.16.12</lombok.version>
         <junit.version>4.12</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
@@ -73,6 +76,16 @@
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
                 <version>${kafka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka_2.11</artifactId>
+                <version>${kafka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.101tec</groupId>
+                <artifactId>zkclient</artifactId>
+                <version>${zk.version}</version>
             </dependency>
             <!-- Utilities -->
             <dependency>
