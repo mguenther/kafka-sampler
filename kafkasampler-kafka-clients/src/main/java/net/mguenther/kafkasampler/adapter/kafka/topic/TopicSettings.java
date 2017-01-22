@@ -58,7 +58,11 @@ public class TopicSettings {
 
     private final Properties properties;
 
-    public static TopicSettingsBuilder newTopic(final String topic) {
+    public static TopicSettingsBuilder builder(final String topic) {
         return new TopicSettingsBuilder(topic);
+    }
+
+    public static TopicSettings useDefaults(final String topic) {
+        return new TopicSettingsBuilder(topic).build();
     }
 }

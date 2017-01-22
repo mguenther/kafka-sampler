@@ -73,4 +73,8 @@ public class ProducerSettings<InputType, OutputType> {
     public static <InputType, OutputType> ProducerSettingsBuilder<InputType, OutputType> builder(final Encoder<InputType, OutputType> encoder) {
         return new ProducerSettingsBuilder<>(encoder);
     }
+
+    public static <InputType, OutputType> ProducerSettings<InputType, OutputType> usingDefaults(final Encoder<InputType, OutputType> encoder) {
+        return new ProducerSettingsBuilder<>(encoder).build();
+    }
 }

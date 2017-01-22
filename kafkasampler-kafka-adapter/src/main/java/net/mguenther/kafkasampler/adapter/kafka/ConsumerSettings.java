@@ -30,7 +30,7 @@ public class ConsumerSettings<InputType, OutputType> {
 
     private static final String DEFAULT_KEY_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
 
-    private static final String DEFAULT_AUTO_OFFSET_RESET = "latest";
+    private static final String DEFAULT_AUTO_OFFSET_RESET = "earliest";
 
     public static class ConsumerSettingsBuilder<InputType, OutputType> {
 
@@ -78,6 +78,7 @@ public class ConsumerSettings<InputType, OutputType> {
             }
 
             final Properties properties = new Properties();
+            properties.put("group.id", consumerGroupId);
             properties.put("bootstrap.servers", bootstrapServer);
             properties.put("enable.auto.commit", enableAutoCommit);
             properties.put("auto.commit.interval.ms", autoCommitIntervalInMillis);
@@ -99,4 +100,16 @@ public class ConsumerSettings<InputType, OutputType> {
     private final int readTimeoutInMillis;
 
     private final Properties properties;
+
+    public static <InputType, OutputType> ConsumerSettingsBuilder<InputType, OutputType> builder(final String consumerGroupId,
+                                                                                                 final Decoder<InputType, OutputType> decoder,
+                                                                                                 final Processor<OutputType> processor) {
+        return new ConsumerSettingsBuilder<>(consumerGroupId, decoder, processor);
+    }
+
+    public static <InputType, OutputType> ConsumerSettings<InputType, OutputType> usingDefaults(final String consumerGroupId,
+                                                                                                final Decoder<InputType, OutputType> decoder,
+                                                                                                final Processor<OutputType> processor) {
+        return new ConsumerSettingsBuilder<>(consumerGroupId, decoder, processor).build();
+    }
 }

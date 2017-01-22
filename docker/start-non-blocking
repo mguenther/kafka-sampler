@@ -1,0 +1,11 @@
+#! /bin/sh
+
+LOGFILE=/tmp/docker-compose.log
+
+if [ -f $LOGFILE ]
+then
+    echo Removing existing log file at $LOGFILE.
+    rm $LOGFILE
+fi
+
+docker-compose up > $LOGFILE &

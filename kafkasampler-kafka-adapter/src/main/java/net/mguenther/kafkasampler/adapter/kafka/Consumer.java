@@ -6,6 +6,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,12 @@ public class Consumer<InputType, OutputType> implements Runnable {
     private volatile boolean running = true;
 
     private KafkaConsumer<String, InputType> underlyingConsumer;
+
+    public Consumer(final String consumerId,
+                    final String topic,
+                    final ConsumerSettings<InputType, OutputType> consumerSettings) {
+        this(consumerId, Collections.singletonList(topic), consumerSettings);
+    }
 
     public Consumer(final String consumerId,
                     final List<String> topics,
@@ -99,7 +106,7 @@ public class Consumer<InputType, OutputType> implements Runnable {
     }
 
     public void stop() {
-        log.info("[{}] Received stop signal.");
+        log.info("[{}] Received stop signal.", consumerId);
         running = false;
     }
 }

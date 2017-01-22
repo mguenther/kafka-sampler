@@ -58,4 +58,8 @@ public class ZooKeeperSettings {
     public static ZooKeeperSettingsBuilder builder() {
         return new ZooKeeperSettingsBuilder();
     }
+
+    public static ZooKeeperSettings usingDefaults() {
+        return new ZooKeeperSettingsBuilder().build();
+    }
 }
