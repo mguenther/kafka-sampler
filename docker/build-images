@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker build -t kafka-sampler/kafka kafka/
+docker build -t kafka-sampler/zookeeper zookeeper/

@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.mguenther.kafkasampler</groupId>
+        <artifactId>kafkasampler-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>net.mguenther.kafkasampler</groupId>
+    <artifactId>kafkasampler-it</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+
+    <name>[kafka-sampler] Integration Tests</name>
+
+    <url>http://mguenther.net</url>
+
+    <properties>
+        <docker.basedir>${project.basedir}/../docker</docker.basedir>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <!--
+                    ########################################################################
+                    ##
+                    ## STEP 1: Build Docker containers for Apache Kafka and Apache ZooKeeper
+                    ##
+                    ########################################################################
+                    -->
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <id>build-docker-containers</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>${docker.basedir}</workingDirectory>
+                            <executable>./build-images</executable>
+                        </configuration>
+                    </execution>
+                    <!--
+                    ########################################################################
+                    ##
+                    ## STEP 2: Stop and remove Docker containers (before test)
+                    ##
+                    ########################################################################
+                    -->
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <id>stop-and-remove-before-test</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>${docker.basedir}</workingDirectory>
+                            <executable>./stop-and-remove</executable>
+                        </configuration>
+                    </execution>
+                    <!--
+                    ########################################################################
+                    ##
+                    ## STEP 3: Start Docker containers (non-blocking)
+                    ##
+                    ########################################################################
+                    -->
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <id>start-docker-containers</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>${docker.basedir}</workingDirectory>
+                            <executable>./start-non-blocking</executable>
+                        </configuration>
+                    </execution>
+                    <!--
+                    ########################################################################
+                    ##
+                    ## STEP 4: Stop and remove Docker containers (after test)
+                    ##
+                    ########################################################################
+                    -->
+                    <execution>
+                        <phase>post-integration-test</phase>
+                        <id>stop-and-remove-after-test</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>${docker.basedir}</workingDirectory>
+                            <executable>./stop-and-remove</executable>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- we need the next plugin to delay the execution of integration tests for a -->
+            <!-- couple of seconds to give the Kafka cluster time to accommodate -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sleep-for-a-while</id>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <target>
+                                <sleep seconds="10" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- finally, we use the maven-failsafe-plugin to execute the integration tests -->
+            <!-- integration tests are identified by the 'IT' suffix -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>integration-test</phase>
+                        <id>run-integration-tests</id>
+                        <configuration>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                            <skip>false</skip>
+                        </configuration>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <phase>verify</phase>
+                        <id>verify-integration-tests</id>
+                        <configuration>
+                            <skip>false</skip>
+                        </configuration>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.mguenther.kafkasampler</groupId>
+            <artifactId>kafkasampler-kafka-adapter</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.mguenther.kafkasampler</groupId>
+            <artifactId>kafkasampler-kafka-clients</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- Testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
