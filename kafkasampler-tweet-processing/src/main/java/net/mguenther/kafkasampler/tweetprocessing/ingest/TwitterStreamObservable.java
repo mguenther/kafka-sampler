@@ -1,4 +1,4 @@
-package net.mguenther.kafkasampler.tweetprocessing;
+package net.mguenther.kafkasampler.tweetprocessing.ingest;
 
 import lombok.extern.slf4j.Slf4j;
 import rx.Observable;
@@ -12,16 +12,16 @@ import twitter4j.TwitterStreamFactory;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * {@code FeedSubscriber} starts off an underlying {@link TwitterStream} which is filtered based
+ * {@code TwitterStreamObservable} starts off an underlying {@link TwitterStream} which is filtered based
  * on a set of keywords. It also handles shutdown management in case the subscription is revoked.
  * This code is heavily inspired by shekhargulati/rx-tweet-stream (GitHub).
  *
  * @author Markus Günther (markus.guenther@gmail.com)
  */
 @Slf4j
-public class FeedSubscriber extends StatusAdapter implements Observable.OnSubscribe<Status> {
+public class TwitterStreamObservable extends StatusAdapter implements Observable.OnSubscribe<Status> {
 
-    private final FeedId tweetFeed;
+    private final IngestHandle tweetFeed;
 
     private final FilterQuery filterBy;
 
@@ -29,7 +29,7 @@ public class FeedSubscriber extends StatusAdapter implements Observable.OnSubscr
 
     private AtomicReference<Subscriber<? super Status>> subscriberRef = new AtomicReference<>(null);
 
-    public FeedSubscriber(final FeedId tweetFeed) {
+    public TwitterStreamObservable(final IngestHandle tweetFeed) {
         this.tweetFeed = tweetFeed;
         this.filterBy = new FilterQuery();
         this.filterBy.track(tweetFeed.getKeywordsAsArray());

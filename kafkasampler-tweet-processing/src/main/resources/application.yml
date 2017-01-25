@@ -1,0 +1,7 @@
+ingestSettings:
+  topic: kafkasampler-raw-tweets
+  keywords: trump
+
+kafkaSettings:
+  zookeeperUrl: localhost:2181
+  brokerUrl: localhost:9092

@@ -1,11 +1,12 @@
-package net.mguenther.kafkasampler.tweetprocessing;
+package net.mguenther.kafkasampler.tweetprocessing.ingest;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import rx.Observable;
 import rx.Subscription;
 import twitter4j.Status;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,9 +17,19 @@ import java.util.stream.Collectors;
  * @author Markus Günther (markus.guenther@gmail.com)
  */
 @Slf4j
-public class FeedManager {
+public class IngestManager {
 
-    private final ConcurrentHashMap<FeedId, Subscription> activeSubscriptions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<IngestHandle, Subscription> activeSubscriptions = new ConcurrentHashMap<>();
+
+    private final RawTweetProducer producer;
+
+    private final String topic;
+
+    public IngestManager(@Autowired final RawTweetProducer producer,
+                         @Value("${ingestSettings.topic}") final String topic) {
+        this.producer = producer;
+        this.topic = topic;
+    }
 
     /**
      * Establishes a new feed that filters an incoming Twitter tweet stream for the given keywords.
@@ -26,17 +37,15 @@ public class FeedManager {
      * @param keywords
      *      {@code List} of keywords that have to be present in a tweet
      * @return
-     *      instance of {@code FeedId}, which provides a unique handle for that feed
+     *      instance of {@code IngestHandle}, which provides a unique handle for that feed
      */
-    public FeedId feed(final List<String> keywords) {
-        final FeedId tweetFeed = new FeedId(keywords);
+    public IngestHandle feed(final List<String> keywords) {
+        final IngestHandle tweetFeed = new IngestHandle(keywords);
         final Observable<Status> observable = Observable
-                .create(new FeedSubscriber(tweetFeed))
+                .create(new TwitterStreamObservable(tweetFeed))
                 .share()
                 .sample(100, TimeUnit.MILLISECONDS);
-        final Subscription subscription = observable.subscribe(
-                nextStatus -> log.info(nextStatus.getText()),
-                e -> log.error("Caught an exception: {}", e));
+        final Subscription subscription = observable.subscribe(new TwitterStreamSubscriber(producer, topic));
         activeSubscriptions.put(tweetFeed, subscription);
         return tweetFeed;
     }
@@ -45,17 +54,17 @@ public class FeedManager {
      * @return
      *      unmodifiable {@code List} of feed handles for all feeds that are currently active
      */
-    public List<FeedId> activeFeeds() {
+    public List<IngestHandle> activeFeeds() {
         return Collections.unmodifiableList(activeSubscriptions.keySet().stream().collect(Collectors.toList()));
     }
 
     /**
-     * Cancels the feed identified by {@code FeedId}.
+     * Cancels the feed identified by {@code IngestHandle}.
      *
      * @param feed
      *      unique handle for a feed
      */
-    public void cancel(final FeedId feed) {
+    public void cancel(final IngestHandle feed) {
         if (activeSubscriptions.containsKey(feed)) {
             log.info("Feed {} is not active.");
             return;
@@ -64,23 +73,5 @@ public class FeedManager {
         subscription.unsubscribe();
         activeSubscriptions.remove(feed);
         log.info("Unsubscribed from {}.", feed);
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        log.info("Starting");
-
-        final FeedManager feeder = new FeedManager();
-        final FeedId tweetFeed = feeder.feed(Arrays.asList("trump"));
-
-        TimeUnit.SECONDS.sleep(10);
-
-        feeder.cancel(tweetFeed);
-
-        log.info("Cancelled the feed.");
-
-        TimeUnit.SECONDS.sleep(10);
-
-        log.info("Nothing should be printed past this point.");
     }
 }

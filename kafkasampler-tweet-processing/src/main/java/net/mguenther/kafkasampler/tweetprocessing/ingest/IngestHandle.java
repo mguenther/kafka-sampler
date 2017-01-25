@@ -1,4 +1,4 @@
-package net.mguenther.kafkasampler.tweetprocessing;
+package net.mguenther.kafkasampler.tweetprocessing.ingest;
 
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class FeedId {
+public class IngestHandle {
 
     private final List<String> keywords;
 
