@@ -8,12 +8,12 @@
     <parent>
         <groupId>net.mguenther.kafkasampler</groupId>
         <artifactId>kafkasampler-parent</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.2.0</version>
     </parent>
 
     <groupId>net.mguenther.kafkasampler</groupId>
     <artifactId>kafkasampler-it</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0</version>
 
     <name>[kafka-sampler] Integration Tests</name>
 
