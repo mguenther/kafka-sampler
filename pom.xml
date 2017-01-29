@@ -38,6 +38,7 @@
         <twitter4j.version>4.0.6</twitter4j.version>
         <rxjava.version>1.1.1</rxjava.version>
         <jackson-databind.version>2.8.3</jackson-databind.version>
+        <guava.version>21.0</guava.version>
         <!-- plugin version -->
         <plugin.lombok.version>1.16.12.0</plugin.lombok.version>
         <plugin.exec.version>1.5.0</plugin.exec.version>
@@ -126,6 +127,11 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <!-- Data Formats -->
             <dependency>
