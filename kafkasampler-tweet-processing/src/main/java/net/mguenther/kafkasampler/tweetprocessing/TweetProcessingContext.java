@@ -1,5 +1,6 @@
 package net.mguenther.kafkasampler.tweetprocessing;
 
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import net.mguenther.kafkasampler.adapter.kafka.ProducerSettings;
 import net.mguenther.kafkasampler.tweetprocessing.ingest.IngestManager;
 import net.mguenther.kafkasampler.tweetprocessing.ingest.RawTweetCodec;
@@ -40,5 +41,10 @@ public class TweetProcessingContext {
     @Bean
     public RawTweetCodec rawTweetCodec() {
         return new RawTweetCodec();
+    }
+
+    @Bean
+    public StanfordCoreNLP pipeline() {
+        return new StanfordCoreNLP("nlpcore.properties");
     }
 }
