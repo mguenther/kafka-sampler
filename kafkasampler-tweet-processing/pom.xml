@@ -67,6 +67,17 @@
             <groupId>io.reactivex</groupId>
             <artifactId>rxjava</artifactId>
         </dependency>
+        <!-- Stanford Core NLP -->
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>${stanford.corenlp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.washington.cs.knowitall.stanford-corenlp</groupId>
+            <artifactId>stanford-parse-models</artifactId>
+            <version>${stanford.models.version}</version>
+        </dependency>
         <!-- Utilities -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -75,6 +86,10 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
         <!-- Logging -->
         <dependency>
