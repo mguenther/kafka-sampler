@@ -1,17 +1,25 @@
 package net.mguenther.kafkasampler.tweetprocessing.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
  * @author Markus Günther (markus.guenther@gmail.com)
  */
-@RequiredArgsConstructor
 @Getter
 @ToString
 public class Location {
 
     private final double latitude;
+
     private final double longitude;
+
+    @JsonCreator
+    public Location(@JsonProperty("latitude") double latitude,
+                    @JsonProperty("longitude") double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }

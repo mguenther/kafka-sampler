@@ -9,8 +9,9 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.mguenther.kafkasampler.tweetprocessing.domain.AnalyzedTweet;
 import net.mguenther.kafkasampler.tweetprocessing.domain.Sentiment;
-import org.apache.commons.lang3.StringUtils;
+import net.mguenther.kafkasampler.tweetprocessing.domain.Tweet;
 
 import java.util.Comparator;
 
@@ -24,13 +25,8 @@ public class CoreNlpSentimentAnalyzer implements SentimentAnalyzer {
     private final StanfordCoreNLP pipeline;
 
     @Override
-    public Sentiment analyze(final String text) {
-
-        if (StringUtils.isEmpty(text)) {
-            log.warn("Unable to run sentiment analysis because the given text is empty.");
-            return Sentiment.UNDEFINED;
-        }
-
+    public AnalyzedTweet analyze(final Tweet tweet) {
+        final String text = tweet.getText();
         final Annotation annotation = pipeline.process(text);
         final Comparator<AnalyzedSentence> bySentenceLength = (a, b) -> Integer.compare(a.sentence.length(), b.sentence.length());
         final Sentiment sentiment = annotation.get(CoreAnnotations.SentencesAnnotation.class)
@@ -41,7 +37,19 @@ public class CoreNlpSentimentAnalyzer implements SentimentAnalyzer {
                 .map(analyzedSentence -> analyzedSentence.sentiment)
                 .orElse(Sentiment.UNDEFINED);
         log.info("Calculated sentiment for text '{}' is {}.", text, sentiment);
-        return sentiment;
+        return toAnalyzedTweet(tweet, sentiment);
+    }
+
+    private AnalyzedTweet toAnalyzedTweet(final Tweet tweet, final Sentiment sentiment) {
+        return new AnalyzedTweet(
+                tweet.getTweetId(),
+                tweet.getText(),
+                tweet.getNumberOfRetweets(),
+                tweet.getNumberOfFavorites(),
+                tweet.getCreatedAt(),
+                tweet.getUser(),
+                sentiment,
+                tweet.getLocation());
     }
 
     @RequiredArgsConstructor
