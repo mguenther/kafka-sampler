@@ -1,7 +1,13 @@
-ingestSettings:
+ingestion:
   topic: kafkasampler-raw-tweets
-  keywords: trump
 
-kafkaSettings:
+sanitizing:
+  topic: kafkasampler-sanitized-tweets
+
+analyzing:
+  topic: kafkasampler-analyzed-tweets
+
+streaming:
+  applicationId: twitter-sentiment-analysis
   zookeeperUrl: localhost:2181
   brokerUrl: localhost:9092
