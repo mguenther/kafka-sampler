@@ -14,14 +14,19 @@ import lombok.ToString;
 @ToString
 public class User {
 
+    @JsonProperty("userId")
     private final long userId;
 
+    @JsonProperty("name")
     private final String name;
 
+    @JsonProperty("screenName")
     private final String screenName;
 
+    @JsonProperty("location")
     private final String location;
 
+    @JsonProperty("numberOfFollowers")
     private final int numberOfFollowers;
 
     @JsonCreator

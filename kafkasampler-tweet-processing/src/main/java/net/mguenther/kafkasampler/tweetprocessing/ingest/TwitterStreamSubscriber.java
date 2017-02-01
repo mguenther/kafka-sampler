@@ -30,6 +30,6 @@ public class TwitterStreamSubscriber extends Subscriber<Status> {
     @Override
     public void onNext(final Status status) {
         rawTweetProducer.log(rawTweetTopic, status);
-        log.info("Committed raw tweet with ID {} to Kafka log {}.", status.getId(), rawTweetTopic);
+        log.debug("Committed raw tweet with ID {} to Kafka log {}.", status.getId(), rawTweetTopic);
     }
 }

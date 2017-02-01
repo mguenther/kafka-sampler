@@ -1,17 +1,29 @@
 package net.mguenther.kafkasampler.tweetprocessing;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import net.mguenther.kafkasampler.adapter.elasticsearch.ClientFactory;
+import net.mguenther.kafkasampler.adapter.elasticsearch.ElasticsearchSettings;
+import net.mguenther.kafkasampler.adapter.elasticsearch.Feeder;
+import net.mguenther.kafkasampler.adapter.kafka.ConsumerSettings;
 import net.mguenther.kafkasampler.adapter.kafka.ProducerSettings;
+import net.mguenther.kafkasampler.tweetprocessing.domain.AnalyzedTweet;
 import net.mguenther.kafkasampler.tweetprocessing.enrichment.CoreNlpSentimentAnalyzer;
 import net.mguenther.kafkasampler.tweetprocessing.enrichment.SentimentAnalyzer;
+import net.mguenther.kafkasampler.tweetprocessing.feeder.AnalyzedTweetCodec;
+import net.mguenther.kafkasampler.tweetprocessing.feeder.AnalyzedTweetConsumer;
+import net.mguenther.kafkasampler.tweetprocessing.feeder.AnalyzedTweetDocument;
+import net.mguenther.kafkasampler.tweetprocessing.feeder.AnalyzedTweetProcessor;
 import net.mguenther.kafkasampler.tweetprocessing.ingest.IngestManager;
 import net.mguenther.kafkasampler.tweetprocessing.ingest.RawTweetCodec;
 import net.mguenther.kafkasampler.tweetprocessing.ingest.RawTweetProducer;
 import net.mguenther.kafkasampler.tweetprocessing.sanitizing.StatusDeduplicationFilter;
 import net.mguenther.kafkasampler.tweetprocessing.sanitizing.TweetSanitizer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import twitter4j.Status;
 
 import java.util.Arrays;
@@ -43,6 +55,44 @@ public class TweetProcessingContext {
     @Bean
     public RawTweetCodec rawTweetCodec() {
         return new RawTweetCodec();
+    }
+
+    @Bean
+    public TaskExecutor taskExecutor() {
+        return new SimpleAsyncTaskExecutor();
+    }
+
+    @Bean
+    public CommandLineRunner schedulingRunner(@Autowired TaskExecutor executor,
+                                              @Autowired AnalyzedTweetConsumer consumer) {
+        return args -> executor.execute(consumer);
+    }
+
+    @Bean
+    public AnalyzedTweetConsumer analyzedTweetConsumer(@Autowired AnalyzedTweetCodec codec,
+                                                       @Autowired AnalyzedTweetProcessor processor,
+                                                       @Autowired TweetProcessingConfig config) {
+        final ConsumerSettings<String, AnalyzedTweet> settings  = ConsumerSettings
+                .builder(config.getFeederId(), codec, processor)
+                .usingBootstrapServer(config.getBrokerUrl())
+                .build();
+        return new AnalyzedTweetConsumer(config.getFeederId(), config.getTopicForAnalyzedTweets(), settings);
+    }
+
+    @Bean
+    public AnalyzedTweetCodec analyzedTweetCodec() {
+        return new AnalyzedTweetCodec();
+    }
+
+    @Bean
+    public AnalyzedTweetProcessor analyzedTweetProcessor(@Autowired Feeder<AnalyzedTweetDocument> feeder) {
+        return new AnalyzedTweetProcessor(feeder);
+    }
+
+    @Bean
+    public Feeder<AnalyzedTweetDocument> feeder(@Autowired TweetProcessingConfig config) {
+        final ElasticsearchSettings settings = ElasticsearchSettings.usingDefaults(config.getElasticsearchHost(), config.getElasticsearchPort());
+        return new Feeder<>(new ClientFactory(settings), config.getIndex());
     }
 
     @Bean

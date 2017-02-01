@@ -44,7 +44,7 @@ public class IngestManager {
         final Observable<Status> observable = Observable
                 .create(new TwitterStreamObservable(tweetFeed))
                 .share()
-                .sample(100, TimeUnit.MILLISECONDS);
+                .sample(3, TimeUnit.SECONDS);
         final Subscription subscription = observable.subscribe(new TwitterStreamSubscriber(producer, topic));
         activeSubscriptions.put(tweetFeed, subscription);
         return tweetFeed;
