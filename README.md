@@ -17,7 +17,9 @@ Running the showcase requires a working installation of Apache ZooKeeper and Apa
 | Application         | Version   | Docker Image            |
 | ------------------- | --------- | ----------------------- |
 | Apache Kafka        | 0.10.1.1  | kafka-sampler/kafka     |
-| Apache Zookeeper    | 3.4.8-1   | kafka-sampler/zookeeper |
+| Apache ZooKeeper    | 3.4.8-1   | kafka-sampler/zookeeper |
+| Elasticsearch       | 2.4.4     | elasticsearch:2         |
+| Kibana              | 4.6.4     | kibana:4                |
 
 ### Building and Running the Containers
 
@@ -46,6 +48,12 @@ $ docker-compose scale kafka=1   # scales down to 1 Kafka broker after the previ
 ```
 
 After changing the number of Kafka brokers, give the cluster some time so that all brokers can finish their cluster-join procedure. This should complete in a couple of seconds and you can inspect the output of the resp. Docker containers just to be sure that everything is fine. Kafka Manager should also reflect the change in the number of Kafka brokers after they successfully joined the cluster.
+
+### Running the Twitter Sentiment Analysis Example Application
+
+The example application also requires a locally running Elasticsearch and a Kibana to visualize the data. Use the `docker-compose` script `with-search.yml` to fire up all systems required. Starting up Kafka, ZooKeeper, Elasticsearch and Kibana might take a couple of seconds. After that, run the `TweetProcessingApplication`. The `TweetProcessingApplication` takes the program argument `ingestion.keywords=<your search keywords>`.
+
+Open up `localhost:5601` in your browser and set up the index `analyzed-tweets`. Use the `createdAt` index field as timestamp provider.
 
 ## On Application Architecture
 

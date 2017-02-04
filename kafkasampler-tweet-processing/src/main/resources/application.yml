@@ -11,3 +11,10 @@ streaming:
   applicationId: twitter-sentiment-analysis
   zookeeperUrl: localhost:2181
   brokerUrl: localhost:9092
+
+feeder:
+  feederId: analyzed-tweet-feeder
+  elastic:
+    host: localhost
+    port: 9300
+    index: analyzed-tweets
