@@ -23,11 +23,15 @@ public class IngestManager {
 
     private final RawTweetProducer producer;
 
+    private final StatusToTweetConverter converter;
+
     private final String topic;
 
     public IngestManager(@Autowired final RawTweetProducer producer,
+                         @Autowired final StatusToTweetConverter converter,
                          @Value("${ingestSettings.topic}") final String topic) {
         this.producer = producer;
+        this.converter = converter;
         this.topic = topic;
     }
 
@@ -44,8 +48,8 @@ public class IngestManager {
         final Observable<Status> observable = Observable
                 .create(new TwitterStreamObservable(tweetFeed))
                 .share()
-                .sample(3, TimeUnit.SECONDS);
-        final Subscription subscription = observable.subscribe(new TwitterStreamSubscriber(producer, topic));
+                .sample(100, TimeUnit.MILLISECONDS);
+        final Subscription subscription = observable.subscribe(new TwitterStreamSubscriber(producer, converter, topic));
         activeSubscriptions.put(tweetFeed, subscription);
         return tweetFeed;
     }

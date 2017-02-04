@@ -3,6 +3,7 @@ package net.mguenther.kafkasampler.tweetprocessing.ingest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.mguenther.kafkasampler.adapter.kafka.Producer;
+import net.mguenther.kafkasampler.tweetprocessing.domain.Tweet;
 import rx.Subscriber;
 import twitter4j.Status;
 
@@ -13,7 +14,8 @@ import twitter4j.Status;
 @RequiredArgsConstructor
 public class TwitterStreamSubscriber extends Subscriber<Status> {
 
-    private final Producer<Status, String> rawTweetProducer;
+    private final Producer<Tweet, String> rawTweetProducer;
+    private final StatusToTweetConverter converter;
     private final String rawTweetTopic;
 
     @Override
@@ -29,7 +31,12 @@ public class TwitterStreamSubscriber extends Subscriber<Status> {
 
     @Override
     public void onNext(final Status status) {
-        rawTweetProducer.log(rawTweetTopic, status);
-        log.debug("Committed raw tweet with ID {} to Kafka log {}.", status.getId(), rawTweetTopic);
+
+        try {
+            rawTweetProducer.log(rawTweetTopic, converter.convert(status));
+            log.debug("Committed raw tweet with ID {} to Kafka log {}.", status.getId(), rawTweetTopic);
+        } catch (Exception e) {
+            log.warn("Unable to log status {} to Kafka.", status, e);
+        }
     }
 }

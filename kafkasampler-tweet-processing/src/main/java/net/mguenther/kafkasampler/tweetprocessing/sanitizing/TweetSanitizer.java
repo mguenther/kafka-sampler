@@ -1,45 +1,37 @@
 package net.mguenther.kafkasampler.tweetprocessing.sanitizing;
 
-import net.mguenther.kafkasampler.tweetprocessing.domain.Location;
 import net.mguenther.kafkasampler.tweetprocessing.domain.Tweet;
-import net.mguenther.kafkasampler.tweetprocessing.domain.User;
-import twitter4j.Status;
 
 /**
  * @author Markus Günther (markus.guenther@gmail.com)
  */
 public class TweetSanitizer {
 
-    private final TextCleaner textCleaner = new TextCleaner();
+    private static final String PATTERN_URL = "((www\\.[^\\s]+)|(https?://[^\\s]+))";
 
-    public Tweet convert(final Status status) {
+    private static final String PATTERN_USER_NAME = "@[^\\s]+";
 
-        final Location location = status.getUser().isGeoEnabled() ? toLocation(status) : null;
+    private static final String PATTERN_HASHTAG = "#";
 
+    private static final String PATTERN_PUNCTUATION = "\\p{Punct}+";
+
+    public Tweet sanitize(final Tweet tweet) {
         return new Tweet(
-                status.getId(),
-                textCleaner.sanitize(status.getText()),
-                status.getRetweetCount(),
-                status.getFavoriteCount(),
-                status.getCreatedAt(),
-                toUser(status),
-                location);
+                tweet.getTweetId(),
+                sanitize(tweet.getText()),
+                tweet.getNumberOfRetweets(),
+                tweet.getNumberOfFavorites(),
+                tweet.getCreatedAt(),
+                tweet.getUser(),
+                tweet.getLocation());
     }
 
-    private User toUser(final Status status) {
-
-        return new User(
-                status.getUser().getId(),
-                status.getUser().getName(),
-                status.getUser().getScreenName(),
-                status.getUser().getLocation(),
-                status.getUser().getFollowersCount());
-    }
-
-    private Location toLocation(final Status status) {
-
-        return new Location(
-                status.getGeoLocation().getLatitude(),
-                status.getGeoLocation().getLongitude());
+    private String sanitize(final String tweetText) {
+        return tweetText
+                .toLowerCase()
+                .replaceAll(PATTERN_URL, "")
+                .replaceAll(PATTERN_USER_NAME, "")
+                .replaceAll(PATTERN_HASHTAG, "")
+                .replaceAll(PATTERN_PUNCTUATION, "");
     }
 }

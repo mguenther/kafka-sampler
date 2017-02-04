@@ -16,7 +16,8 @@ import net.mguenther.kafkasampler.tweetprocessing.feeder.AnalyzedTweetProcessor;
 import net.mguenther.kafkasampler.tweetprocessing.ingest.IngestManager;
 import net.mguenther.kafkasampler.tweetprocessing.ingest.RawTweetCodec;
 import net.mguenther.kafkasampler.tweetprocessing.ingest.RawTweetProducer;
-import net.mguenther.kafkasampler.tweetprocessing.sanitizing.StatusDeduplicationFilter;
+import net.mguenther.kafkasampler.tweetprocessing.ingest.StatusToTweetConverter;
+import net.mguenther.kafkasampler.tweetprocessing.sanitizing.TweetDeduplicationFilter;
 import net.mguenther.kafkasampler.tweetprocessing.sanitizing.TweetSanitizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -36,8 +37,9 @@ public class TweetProcessingContext {
 
     @Bean
     public IngestManager feedManager(@Autowired RawTweetProducer producer,
+                                     @Autowired StatusToTweetConverter converter,
                                      @Autowired TweetProcessingConfig config) {
-        final IngestManager manager = new IngestManager(producer, config.getTopicForRawTweets());
+        final IngestManager manager = new IngestManager(producer, converter, config.getTopicForRawTweets());
         manager.feed(Arrays.asList(config.getKeywords()));
         return manager;
     }
@@ -55,6 +57,11 @@ public class TweetProcessingContext {
     @Bean
     public RawTweetCodec rawTweetCodec() {
         return new RawTweetCodec();
+    }
+
+    @Bean
+    public StatusToTweetConverter statusToTweetConverter() {
+        return new StatusToTweetConverter();
     }
 
     @Bean
@@ -106,8 +113,8 @@ public class TweetProcessingContext {
     }
 
     @Bean
-    public StatusDeduplicationFilter filter() {
-        return new StatusDeduplicationFilter();
+    public TweetDeduplicationFilter filter() {
+        return new TweetDeduplicationFilter();
     }
 
     @Bean
@@ -116,7 +123,7 @@ public class TweetProcessingContext {
     }
 
     @Bean
-    public TwitterSentimentAnalysis processing(@Autowired StatusDeduplicationFilter filter,
+    public TwitterSentimentAnalysis processing(@Autowired TweetDeduplicationFilter filter,
                                                @Autowired TweetSanitizer sanitizer,
                                                @Autowired SentimentAnalyzer analyzer,
                                                @Autowired TweetProcessingConfig config) {
