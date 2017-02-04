@@ -51,7 +51,7 @@ After changing the number of Kafka brokers, give the cluster some time so that a
 
 ### Running the Twitter Sentiment Analysis Example Application
 
-The example application also requires a locally running Elasticsearch and a Kibana to visualize the data. Use the `docker-compose` script `with-search.yml` to fire up all systems required. Starting up Kafka, ZooKeeper, Elasticsearch and Kibana might take a couple of seconds. After that, run the `TweetProcessingApplication`.
+The example application also requires a locally running Elasticsearch and a Kibana to visualize the data. Use the `docker-compose` script `with-search.yml` to fire up all systems required. Starting up Kafka, ZooKeeper, Elasticsearch and Kibana might take a couple of seconds. After that, run the `TweetProcessingApplication`. The `TweetProcessingApplication` takes the program argument `ingestion.keywords=<your search keywords>`.
 
 Open up `localhost:5601` in your browser and set up the index `analyzed-tweets`. Use the `createdAt` index field as timestamp provider.
 
