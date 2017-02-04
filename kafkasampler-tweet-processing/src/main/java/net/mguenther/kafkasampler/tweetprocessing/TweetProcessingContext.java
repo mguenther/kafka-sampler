@@ -7,7 +7,6 @@ import net.mguenther.kafkasampler.adapter.elasticsearch.Feeder;
 import net.mguenther.kafkasampler.adapter.kafka.ConsumerSettings;
 import net.mguenther.kafkasampler.adapter.kafka.ProducerSettings;
 import net.mguenther.kafkasampler.tweetprocessing.domain.AnalyzedTweet;
-import net.mguenther.kafkasampler.tweetprocessing.enrichment.CoreNlpSentimentAnalyzer;
 import net.mguenther.kafkasampler.tweetprocessing.enrichment.SentimentAnalyzer;
 import net.mguenther.kafkasampler.tweetprocessing.feeder.AnalyzedTweetCodec;
 import net.mguenther.kafkasampler.tweetprocessing.feeder.AnalyzedTweetConsumer;
@@ -109,7 +108,7 @@ public class TweetProcessingContext {
 
     @Bean
     public SentimentAnalyzer analyzer(final StanfordCoreNLP pipeline) {
-        return new CoreNlpSentimentAnalyzer(pipeline);
+        return new SentimentAnalyzer(pipeline);
     }
 
     @Bean

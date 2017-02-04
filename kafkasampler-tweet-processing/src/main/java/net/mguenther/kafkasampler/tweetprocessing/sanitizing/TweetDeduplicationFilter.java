@@ -7,6 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.mguenther.kafkasampler.tweetprocessing.domain.Tweet;
 
 /**
+ * The tweet duplication filter is based on a non-distributed bloom filter for simplicity.
+ * This implementation constrains the de-duplication filter to a single running instance.
+ * Running the sentiment analysis on multiple nodes would require coordination in the form
+ * of a distributed bloom filter.
+ *
  * @author Markus Günther (markus.guenther@gmail.com)
  */
 @Slf4j

@@ -20,35 +20,12 @@ import java.util.Date;
 @Getter
 @EqualsAndHashCode(of = "tweetId")
 @ToString
-public class AnalyzedTweet {
+public class AnalyzedTweet extends Tweet {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @JsonProperty("tweetId")
-    private final long tweetId;
-
-    @JsonProperty("text")
-    private final String text;
-
-    @JsonProperty("numberOfRetweets")
-    private final int numberOfRetweets;
-
-    @JsonProperty("numberOfFavorites")
-    private final int numberOfFavorites;
-
-    @JsonProperty("createdAt")
-    @JsonSerialize(using = UtcIso8601Serializer.class)
-    @JsonDeserialize(using = UtcIso8601Deserializer.class)
-    private final Date createdAt;
-
-    @JsonProperty("user")
-    private final User user;
-
     @JsonProperty("sentiment")
     private final Sentiment sentiment;
-
-    @JsonProperty("location")
-    private Location location;
 
     @JsonCreator
     public AnalyzedTweet(@JsonProperty("tweetId") final long tweetId,
@@ -59,14 +36,8 @@ public class AnalyzedTweet {
                          @JsonProperty("user") final User user,
                          @JsonProperty("sentiment") final Sentiment sentiment,
                          @JsonProperty("location") final Location location) {
-        this.tweetId = tweetId;
-        this.text = text;
-        this.numberOfRetweets = numberOfRetweets;
-        this.numberOfFavorites = numberOfFavorites;
-        this.createdAt = createdAt;
-        this.user = user;
+        super(tweetId, text, numberOfRetweets, numberOfFavorites, createdAt, user, location);
         this.sentiment = sentiment;
-        this.location = location;
     }
 
     public String toJson() {
