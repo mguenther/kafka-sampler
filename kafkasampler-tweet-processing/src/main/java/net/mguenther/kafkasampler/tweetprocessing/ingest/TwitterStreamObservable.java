@@ -9,6 +9,7 @@ import twitter4j.StatusAdapter;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -21,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 public class TwitterStreamObservable extends StatusAdapter implements Observable.OnSubscribe<Status> {
 
-    private final IngestHandle tweetFeed;
+    private final String ingestId;
 
     private final FilterQuery filterBy;
 
@@ -29,10 +30,10 @@ public class TwitterStreamObservable extends StatusAdapter implements Observable
 
     private AtomicReference<Subscriber<? super Status>> subscriberRef = new AtomicReference<>(null);
 
-    public TwitterStreamObservable(final IngestHandle tweetFeed) {
-        this.tweetFeed = tweetFeed;
+    public TwitterStreamObservable(final String ingestId, final List<String> keywords) {
+        this.ingestId = ingestId;
         this.filterBy = new FilterQuery();
-        this.filterBy.track(tweetFeed.getKeywordsAsArray());
+        this.filterBy.track(keywords.toArray(new String[0]));
         log.info("FilterBy: {}", filterBy);
         this.stream = new TwitterStreamFactory().getInstance();
     }
@@ -68,7 +69,7 @@ public class TwitterStreamObservable extends StatusAdapter implements Observable
     }
 
     private void shutdownStream() {
-        log.info("Shutting down stream for {}.", tweetFeed);
+        log.info("Shutting down stream for {}.", ingestId);
         if (stream != null) {
             stream.shutdown();
         }

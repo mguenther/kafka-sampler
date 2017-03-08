@@ -14,9 +14,6 @@ public class TweetProcessingConfig {
     @Value("${ingestion.topic}")
     private String topicForRawTweets;
 
-    @Value("${ingestion.keywords}")
-    private String keywords;
-
     @Value("${sanitizing.topic}")
     private String topicForSanitizedTweets;
 
