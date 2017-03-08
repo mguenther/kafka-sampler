@@ -38,7 +38,6 @@ public class TweetProcessingContext {
                                      @Autowired StatusToTweetConverter converter,
                                      @Autowired TweetProcessingConfig config) {
         final IngestManager manager = new IngestManager(producer, converter, config.getTopicForRawTweets());
-        //manager.feed(Arrays.asList(config.getKeywords()));
         return manager;
     }
 
