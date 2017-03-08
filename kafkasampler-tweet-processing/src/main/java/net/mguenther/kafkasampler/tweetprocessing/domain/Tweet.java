@@ -24,18 +24,27 @@ public class Tweet {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    @JsonProperty("tweetId")
     private final long tweetId;
 
+    @JsonProperty("text")
     private final String text;
 
+    @JsonProperty("numberOfRetweets")
     private final int numberOfRetweets;
 
+    @JsonProperty("numberOfFavorites")
     private final int numberOfFavorites;
 
+    @JsonProperty("createdAt")
+    @JsonSerialize(using = UtcIso8601Serializer.class)
+    @JsonDeserialize(using = UtcIso8601Deserializer.class)
     private final Date createdAt;
 
+    @JsonProperty("user")
     private final User user;
 
+    @JsonProperty("location")
     private Location location;
 
     @JsonCreator

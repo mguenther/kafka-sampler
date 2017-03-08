@@ -1,0 +1,39 @@
+@startuml
+
+class Tweet {
+  -tweetId: long
+  -createdAt: Date
+  -text: String
+  -numberOfRetweets: int
+  -numberOfFavorites: int
+  -user: User
+  -location: Location
+}
+
+class User {
+  -userId: long
+  -name: String
+  -screenName: String
+  -location: String
+  -numberOfFollowers: int
+}
+
+class Location {
+  -latitude: double
+  -longitude: double
+}
+
+class Sentiment <<enum>> {
+  NEGATIVE
+  NEUTRAL
+  POSITIVE
+  UNDEFINED
+}
+
+Tweet ..> User
+Tweet ..> Location
+
+AnalyzedTweet --|> Tweet
+AnalyzedTweet ..> Sentiment
+
+@enduml

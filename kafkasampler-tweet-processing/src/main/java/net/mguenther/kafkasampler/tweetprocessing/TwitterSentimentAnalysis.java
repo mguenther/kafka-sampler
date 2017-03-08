@@ -5,7 +5,7 @@ import net.mguenther.kafkasampler.adapter.kafka.StreamSettings;
 import net.mguenther.kafkasampler.tweetprocessing.domain.AnalyzedTweet;
 import net.mguenther.kafkasampler.tweetprocessing.domain.Tweet;
 import net.mguenther.kafkasampler.tweetprocessing.enrichment.SentimentAnalyzer;
-import net.mguenther.kafkasampler.tweetprocessing.sanitizing.StatusDeduplicationFilter;
+import net.mguenther.kafkasampler.tweetprocessing.sanitizing.TweetDeduplicationFilter;
 import net.mguenther.kafkasampler.tweetprocessing.sanitizing.TweetSanitizer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.serialization.Serdes;
@@ -13,9 +13,6 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.springframework.stereotype.Component;
-import twitter4j.Status;
-import twitter4j.TwitterException;
-import twitter4j.TwitterObjectFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -27,7 +24,7 @@ import javax.annotation.PreDestroy;
 @Component
 public class TwitterSentimentAnalysis {
 
-    private final StatusDeduplicationFilter filter;
+    private final TweetDeduplicationFilter filter;
 
     private final TweetSanitizer sanitizer;
 
@@ -37,7 +34,7 @@ public class TwitterSentimentAnalysis {
 
     private final KafkaStreams streams;
 
-    public TwitterSentimentAnalysis(final StatusDeduplicationFilter filter,
+    public TwitterSentimentAnalysis(final TweetDeduplicationFilter filter,
                                     final TweetSanitizer sanitizer,
                                     final SentimentAnalyzer analyzer,
                                     final TweetProcessingConfig config) {
@@ -82,9 +79,9 @@ public class TwitterSentimentAnalysis {
     private void setupSanitizingStream(final KStreamBuilder builder) {
         final KStream<String, String> fromRaw = builder.stream(config.getTopicForRawTweets());
         final KStream<String, String> toSanitize = fromRaw
-                .mapValues(this::toStatus)
+                .mapValues(value -> Tweet.fromJson(value))
                 .filter((key, value) -> filter.notSeenBefore(value))
-                .mapValues(sanitizer::convert)
+                .mapValues(sanitizer::sanitize)
                 .mapValues(Tweet::toJson);
         toSanitize.to(Serdes.String(), Serdes.String(), config.getTopicForSanitizedTweets());
         log.info("Tweet Sanitizing stream is configured.");
@@ -99,14 +96,5 @@ public class TwitterSentimentAnalysis {
                 .mapValues(AnalyzedTweet::toJson);
         toAnalyze.to(Serdes.String(), Serdes.String(), config.getTopicForAnalyzedTweets());
         log.info("Tweet Analyzation stream is configured.");
-    }
-
-    private Status toStatus(String json) {
-        try {
-            return TwitterObjectFactory.createStatus(json);
-        } catch (TwitterException e) {
-            log.warn("Could not deserialize JSON string to instance of Status.");
-            return null;
-        }
     }
 }

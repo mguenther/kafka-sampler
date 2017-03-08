@@ -11,10 +11,11 @@
         <version>0.4.0</version>
     </parent>
 
-    <artifactId>kafkasampler-kafka-adapter</artifactId>
+    <groupId>net.mguenther.kafkasampler</groupId>
+    <artifactId>kafkasampler-elasticsearch-adapter</artifactId>
     <version>0.4.0</version>
 
-    <name>[kafka-sampler] Kafka Adapter</name>
+    <name>[kafka-sampler] Elasticsearch Adapter</name>
 
     <url>http://mguenther.net</url>
 
@@ -34,16 +35,10 @@
     </build>
 
     <dependencies>
-        <!-- Kafka -->
+        <!-- Elasticsearch -->
         <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>${kafka.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-streams</artifactId>
-            <version>${kafka.version}</version>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
         </dependency>
         <!-- Utilities -->
         <dependency>
@@ -54,6 +49,23 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jcl</artifactId>
         </dependency>
         <!-- Testing -->
         <dependency>

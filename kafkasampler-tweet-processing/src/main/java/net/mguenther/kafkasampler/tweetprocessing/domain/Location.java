@@ -12,8 +12,10 @@ import lombok.ToString;
 @ToString
 public class Location {
 
+    @JsonProperty("latitude")
     private final double latitude;
 
+    @JsonProperty("longitude")
     private final double longitude;
 
     @JsonCreator

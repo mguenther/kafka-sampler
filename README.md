@@ -17,7 +17,9 @@ Running the showcase requires a working installation of Apache ZooKeeper and Apa
 | Application         | Version   | Docker Image            |
 | ------------------- | --------- | ----------------------- |
 | Apache Kafka        | 0.10.1.1  | kafka-sampler/kafka     |
-| Apache Zookeeper    | 3.4.8-1   | kafka-sampler/zookeeper |
+| Apache ZooKeeper    | 3.4.8-1   | kafka-sampler/zookeeper |
+| Elasticsearch       | 2.4.4     | elasticsearch:2         |
+| Kibana              | 4.6.4     | kibana:4                |
 
 ### Building and Running the Containers
 
@@ -46,6 +48,71 @@ $ docker-compose scale kafka=1   # scales down to 1 Kafka broker after the previ
 ```
 
 After changing the number of Kafka brokers, give the cluster some time so that all brokers can finish their cluster-join procedure. This should complete in a couple of seconds and you can inspect the output of the resp. Docker containers just to be sure that everything is fine. Kafka Manager should also reflect the change in the number of Kafka brokers after they successfully joined the cluster.
+
+### Running the Twitter Sentiment Analysis Example Application
+
+The example application also requires a locally running Elasticsearch and a Kibana to visualize the data. Use the `docker-compose` script `with-search.yml` to fire up all systems required. Starting up Kafka, ZooKeeper, Elasticsearch and Kibana might take a couple of seconds. After that, run the `TweetProcessingApplication`.
+
+Open up `localhost:5601` in your browser and set up the index `analyzed-tweets`. Use the `createdAt` index field as timestamp provider.
+
+The example application provides a simple HTTP API to manage ingests.
+
+#### Creating Ingestion Feeds
+
+Issue the following `CURL`-command from the command line.
+
+```bash
+$ curl -X POST http://localhost:8080/api/ingests?keywords=kafka -I
+```
+
+This yields
+
+```
+HTTP/1.1 201 
+Location: http://localhost:8080/ingests/efa790e
+Content-Length: 0
+Date: Wed, 08 Mar 2017 18:59:57 GMT
+```
+
+which tells you that the new ingestion feed with ID `efa790e` has been created. Switching back to your application logs, you should see that Twitter4J is pulling data off of Twitter and that enriched tweets are fed into the local Elasticsearch.
+
+#### Showing Active Ingestion Feeds
+ 
+Issue the following `CURL`-command from the command line.
+
+```bash
+$ curl http://localhost:8080/api/ingests -I
+```
+
+This yields
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+Content-Length: 57
+Date: Wed, 08 Mar 2017 19:04:01 GMT
+
+{"ingests":[{"ingestId":"efa790e","keywords":["kafka"]}]}
+```
+
+which tells you that there is currently a single ingestion feed active and it goes by the ID `efa790e`.
+
+#### Terminating Ingestion Feeds
+
+Issue the following `CURL`-command from the command line.
+
+```bash
+curl -X DELETE http://localhost:8080/api/ingests/efa790e -I
+```
+
+This yields
+
+```
+HTTP/1.1 204 
+Date: Wed, 08 Mar 2017 19:05:36 GMT
+```
+
+which tells you that the ingestion feed has been successfully terminated. Switching back to your application logs, you should see that Kafka Streams still processes the bulk of messages that has already been emitted to the resp. Kafka topic. Shortly after that, ingestion should stop as there is no new data available.
 
 ## On Application Architecture
 
