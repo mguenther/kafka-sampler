@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "Pie-Chart-Sentiment",
+    "_type": "visualization",
+    "_source": {
+      "title": "Pie Chart Sentiment",
+      "visState": "{\"title\":\"New Visualization\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"sentiment\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"analyzed-tweets\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "Number-of-Neutral-Sentiments",
+    "_type": "visualization",
+    "_source": {
+      "title": "Number of Neutral Sentiments",
+      "visState": "{\"title\":\"New Visualization\",\"type\":\"metric\",\"params\":{\"handleNoResults\":true,\"fontSize\":\"60\"},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Neutral Tweets\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"analyzed-tweets\",\"query\":{\"query_string\":{\"query\":\"sentiment: neutral\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "Number-of-Positive-Tweets",
+    "_type": "visualization",
+    "_source": {
+      "title": "Number of Positive Tweets",
+      "visState": "{\"title\":\"New Visualization\",\"type\":\"metric\",\"params\":{\"handleNoResults\":true,\"fontSize\":60},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"analyzed-tweets\",\"query\":{\"query_string\":{\"query\":\"sentiment: positive\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "Number-of-Negative-Tweets",
+    "_type": "visualization",
+    "_source": {
+      "title": "Number of Negative Tweets",
+      "visState": "{\"title\":\"New Visualization\",\"type\":\"metric\",\"params\":{\"handleNoResults\":true,\"fontSize\":60},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"analyzed-tweets\",\"query\":{\"query_string\":{\"query\":\"sentiment: negative\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  }
+]
