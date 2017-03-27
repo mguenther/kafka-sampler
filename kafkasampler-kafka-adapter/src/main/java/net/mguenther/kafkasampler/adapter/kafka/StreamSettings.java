@@ -61,7 +61,7 @@ public class StreamSettings<KeyType, ValueType> {
         public StreamSettings<KeyType, ValueType> build() {
 
             final Properties properties = new Properties();
-            properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "twitter-sentiment-analysis");
+            properties.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId);
             properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
             properties.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, zookeeperUrl);
             properties.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, keyCodec.getClass().getName());

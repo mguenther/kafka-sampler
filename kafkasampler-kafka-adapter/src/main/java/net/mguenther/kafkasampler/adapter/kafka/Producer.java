@@ -35,4 +35,12 @@ public class Producer<InputType, OutputType> {
             log.debug("[{}] Submitted message '{}' to topic '{}'.", producerId, message, topic);
         });
     }
+
+    public void log(final String topic, final String key, final InputType message) {
+        encoder.encode(message).ifPresent(encodedMessage -> {
+            final ProducerRecord<String, OutputType> record = new ProducerRecord<>(topic, key, encodedMessage);
+            underlyingProducer.send(record);
+            log.debug("[{}] Submitted keyed message '{}' with key '{}' to topic '{}'.", producerId, message, key, topic);
+        });
+    }
 }
