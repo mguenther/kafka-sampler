@@ -61,7 +61,7 @@ public class TimeWindowAggregationDemo {
                 .mapValues(MinuteByMinuteReport::fromJson);
         minuteByMinuteClicks.foreach((k, v) -> log.info("Advertisement '{}' has received {} clicks during the last minute.", v.getDescription(), v.getNumberOfClicks()));
 
-        final StreamSettings<String, String> settings = StreamSettings.usingDefaults(INSTANCE_ID);
+        final StreamSettings<String, String> settings = StreamSettings.builder(INSTANCE_ID, Serdes.String(), Serdes.String()).usingTimestampExtractor(EventTimeTimestampExtractor.class).build();
         final KafkaStreams topology = new KafkaStreams(builder, settings.getProperties());
         topology.start();
 
