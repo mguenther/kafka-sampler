@@ -1,4 +1,4 @@
-package net.mguenther.kafkasampler.streams;
+package net.mguenther.kafkasampler.streams.joins;
 
 import lombok.extern.slf4j.Slf4j;
 import net.mguenther.kafkasampler.adapter.kafka.Codec;

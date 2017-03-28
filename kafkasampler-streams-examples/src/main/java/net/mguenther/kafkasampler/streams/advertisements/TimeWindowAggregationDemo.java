@@ -1,4 +1,4 @@
-package net.mguenther.kafkasampler.streams;
+package net.mguenther.kafkasampler.streams.advertisements;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
