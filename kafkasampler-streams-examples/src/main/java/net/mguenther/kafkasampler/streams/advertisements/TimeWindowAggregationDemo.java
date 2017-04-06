@@ -14,6 +14,8 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.kstream.Windows;
+import org.apache.kafka.streams.kstream.internals.TimeWindow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,11 +46,15 @@ public class TimeWindowAggregationDemo {
 
         KGroupedStream<String, AdvertisementClicked> clicksPerAdvertisement = advertisementClickedStream
                 .mapValues(AdvertisementClicked::fromJson)
+                //.foreach((k, v) -> log.info(v.toString()))
                 .groupByKey();
         KTable<String, Advertisement> advertisements = builder
                 .table(Serdes.String(), Serdes.String(), TOPIC_AD_DETAILS, "advertisements")
                 .mapValues(Advertisement::fromJson);
-        KTable<Windowed<String>, Long> clicksPerMinute = clicksPerAdvertisement.count(TimeWindows.of(60 * 1000), "clicksPerMinute");
+
+        Windows<TimeWindow> timewindow = TimeWindows.of(60*1000).until(24*60*60*1000);
+        KTable<Windowed<String>, Long> clicksPerMinute = clicksPerAdvertisement
+                .count(timewindow, "clicksPerMinute");
         clicksPerMinute
                 .toStream((wk, v) -> wk.key())
                 .mapValues(String::valueOf)
