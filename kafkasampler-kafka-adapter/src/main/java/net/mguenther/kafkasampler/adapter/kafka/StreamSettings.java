@@ -8,6 +8,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.processor.TimestampExtractor;
 
 import java.util.Properties;
 
@@ -40,6 +41,8 @@ public class StreamSettings<KeyType, ValueType> {
 
         private String autoOffsetResetConfig = DEFAULT_AUTO_OFFSET_RESET_CONFIG;
 
+        private Class<? extends TimestampExtractor> timestampExtractorClass;
+
         public StreamSettingsBuilder(final String applicationId,
                                      final Serde<KeyType> keyCodec,
                                      final Serde<ValueType> valueCodec) {
@@ -58,14 +61,22 @@ public class StreamSettings<KeyType, ValueType> {
             return this;
         }
 
+        public StreamSettingsBuilder usingTimestampExtractor(final Class<? extends TimestampExtractor> clazz) {
+            this.timestampExtractorClass = clazz;
+            return this;
+        }
+
         public StreamSettings<KeyType, ValueType> build() {
 
             final Properties properties = new Properties();
-            properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "twitter-sentiment-analysis");
+            properties.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId);
             properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
             properties.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, zookeeperUrl);
             properties.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, keyCodec.getClass().getName());
             properties.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, valueCodec.getClass().getName());
+            if (timestampExtractorClass != null) {
+                properties.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, timestampExtractorClass.getName());
+            }
             properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetResetConfig);
             return new StreamSettings<>(applicationId, keyCodec, valueCodec, properties);
         }

@@ -1,12 +1,17 @@
-# Building a Streaming Architecture with Apache Kafka
+# Building Streaming Applications with Apache Kafka
 
-This repository showcases how to build a streaming architecture using Apache Kafka and a variety of other tools and libraries that fit well with Kafka. 
+This repository showcases how to build streaming applications using Apache Kafka and a variety of other tools and libraries that are a good fit for a Kafka-based application. 
 
-The example application focuses around sentiment analysis and analyzes a tweet stream obtained from Twitter. Raw tweets have to be processed and enriched over multiple filters until they can be properly analyzed. Apache Kafka is at the heart of this data pipeline, connecting filters using Kafka Streams.
+This repository is structured into several smaller modules, each highlighting a different aspect of a Kafka-based application.
 
-The following diagram shows the overall architecture of the implemented system.
-
-![Overview](doc/overview.jpg)
+| Module                               | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kafkasampler-elasticsearch-adapter` | Provides a small and simple adapter for Elasticsearch. The example application in `kafkasampler-tweet-processing` makes use of this adapter to push analyzed data records in to a dedicated index.                                                                                                                                                                                                                                                                       |
+| kafkasampler-it                      | Hosts integration tests.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `kafkasampler-kafka-adapter`         | Provides a couple of useful abstractions that ease the integration of the client-side API of Apache Kafka.                                                                                                                                                                                                                                                                                                                                                               |
+| `kafkasampler-kafka-clients`         | Provides client APIs for cluster management (e.g. topic management).                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `kafkasampler-streams-examples`      | Demonstrates the usage of Kafka Streams over the course of a couple of small applications.                                                                                                                                                                                                                                                                                                                                                                               |
+| `kafkasampler-tweet-processing`      | A complete example application that conducts a sentiment analysis on Twitter tweets. Tweets are obtained in their raw from from Twitter and written to a dedicated Kafka topic. These raw data records are transformed and enriched across multiple filters before they are fed back into an Elasticsearch index for further visualization using Kibana. Apache Kafka is at the heart of this data pipeline, connecting filters as stream processors using Kafka Streams.|
 
 ## Prerequisites
 
@@ -49,7 +54,7 @@ $ docker-compose scale kafka=1   # scales down to 1 Kafka broker after the previ
 
 After changing the number of Kafka brokers, give the cluster some time so that all brokers can finish their cluster-join procedure. This should complete in a couple of seconds and you can inspect the output of the resp. Docker containers just to be sure that everything is fine. Kafka Manager should also reflect the change in the number of Kafka brokers after they successfully joined the cluster.
 
-### Running the Twitter Sentiment Analysis Example Application
+## Twitter Sentiment Analysis Example Application
 
 The example application also requires a locally running Elasticsearch and a Kibana to visualize the data. Use the `docker-compose` script `with-search.yml` to fire up all systems required. Starting up Kafka, ZooKeeper, Elasticsearch and Kibana might take a couple of seconds. After that, run the `TweetProcessingApplication`.
 
@@ -57,7 +62,7 @@ Open up `localhost:5601` in your browser and set up the index `analyzed-tweets`.
 
 The example application provides a simple HTTP API to manage ingests.
 
-#### Creating Ingestion Feeds
+### Creating Ingestion Feeds
 
 Issue the following `CURL`-command from the command line.
 
@@ -76,7 +81,7 @@ Date: Wed, 08 Mar 2017 18:59:57 GMT
 
 which tells you that the new ingestion feed with ID `efa790e` has been created. Switching back to your application logs, you should see that Twitter4J is pulling data off of Twitter and that enriched tweets are fed into the local Elasticsearch.
 
-#### Showing Active Ingestion Feeds
+### Showing Active Ingestion Feeds
  
 Issue the following `CURL`-command from the command line.
 
@@ -97,7 +102,7 @@ Date: Wed, 08 Mar 2017 19:04:01 GMT
 
 which tells you that there is currently a single ingestion feed active and it goes by the ID `efa790e`.
 
-#### Terminating Ingestion Feeds
+### Terminating Ingestion Feeds
 
 Issue the following `CURL`-command from the command line.
 
@@ -114,106 +119,11 @@ Date: Wed, 08 Mar 2017 19:05:36 GMT
 
 which tells you that the ingestion feed has been successfully terminated. Switching back to your application logs, you should see that Kafka Streams still processes the bulk of messages that has already been emitted to the resp. Kafka topic. Shortly after that, ingestion should stop as there is no new data available.
 
-## On Application Architecture
+## Kafka Streams Demo
 
-### Kafka Integration
+Module `kafkasampler-streams-examples` hosts a couple of small programs that demonstrate different uses of Kafka Streams high-level DSL. All programs require a working Kafka cluster consisting of at least one broker and one ZooKeeper instance. Use the default `docker-compose` script to fire up all required systems before executing any of the provided examples.
 
-First things first: We need to integrate the Kafka Client API into our solution by providing a small `kafkasampler-kafka-adapter` that implements a couple of abstractions that we can use to get started. This Kafka Adapter provides abstractions for message encoding as well as a producer and consumer that work out of the box with these abstractions. The design goal is that an application that uses the adapter simply provides a codec that negotiates between the application-level message types and a message format that Kafka understands.
 
-#### Message Codecs
-
-An `Encoder` knows how to encode instances of a certain input type - call it `I` - to instances of a certain output type - call it `O`. The input type would be your application-level data type, for instances a data holder like the following `Message` class:
-
-```java
-@RequiredArgsConstructor
-@Getter
-class Message {
-  private final UUID messageId;
-  private final String messageBody;
-}
-```
-
-The output type would be something that the underlying Kafka serializer is able to write to a Kafka log. Apache Kafka comes with a variety of [serializers](https://kafka.apache.org/0100/javadoc/org/apache/kafka/common/serialization/Serializer.html) (and their resp. deserializers for the inverse operation). We transform instances of class `Message` to a `String` which is written to a Kafka log using `org.apache.kafka.common.serialization.StringSerializer`.
-
-Hence, an `Encoder` must also know which Kafka serializer is compatible with the output type `O`. We can express that easily using the following interface.
-
-```java
-import org.apache.kafka.common.serialization.Serializer;
-
-import java.util.Optional;
-
-public interface Encoder<I, O> {
-  /**
-   * Encodes the given input of type {@code I} to an output of type {@code O}.
-   */
-  Optional<O> encode(I input);
-  
-  /**
-   * @return
-   *   The {@link Serializer} that is compatible with the output type {@code O}
-   *   of this {@code Encoder}
-   */
-  Class<? extends Serializer<O>> underlyingKafkaSerializer();
-}
-```
-
-A `Decoder` provides the inverse operation to an `Encoder`. Hence, it actually is encoder in which input type `I` and `O` swap positions. But since Kafka uses a dedicated type for its `Deserializers`, we have to provide a dedicated interface as well.
-
-For class `Message`, the `Decoder` would tie the underlying Kafka deserializer to `org.apache.kafka.common.serialization.StringDeserializer` and provide the means to transform the resulting `String` back to an instance of `Message`.
- 
-```java
-import org.apache.kafka.common.serialization.Deserializer;
-
-import java.util.Optional
-
-public interface Decoder<I, O> {
-  /**
-   * Decodes the given input of type {@code I} to an output of type {@code O}.
-   */
-  Optional<O> decode(InputType I);
-  
-  /**
-   * @return
-   *   The {@link Deserializer} that is compatible with the input type {@code I}
-   *   of this {@code Decoder}
-   */
-  Class<? extends Deserializer<I>> underlyingKafkaDeserializer();
-}
-
-```
-
-Note that the input type `I` for the `Decoder` is the output type `O` of a corresponding `Encoder`.
-
-A `Codec` ties both `Encoder` and `Decoder` together in such a way that they form a bijective mapping between their types.
-
-```java
-public interface Codec<I, O> extends Encoder<I, O>, Decoder<O, I> {
-}
-```
-
-Note that the `Codec` properly swaps the positions of the input type `I` wrt. to `Encoder` and `Decoder` (same goes for output type `O`).
-
-The idea is that applications one have to build the resp. `Codec` to write application-level data types to a Kafka log and read them back off of it. A viable solution for our example using class `Message` could be to implement a `JsonCodec<T>` (e.g. using Jackson) that implements `Codec<T, String>` and transforms instances of `Message` to the corresponding JSON string. This JSON string could be serialized using Kafka's `StringSerializer` and deserialized using `StringDeserializer`.
-
-#### Message Processors
-
-A `Processor` sits on the consuming side and handles application-level data types. Processing such data types may involve I/O, hence the processing logic should be decoupled from the execution of the `Consumer` that read the data off of a Kafka log that it is subscribed to. We can express the contract for a `Processor` using the following interface.
-
-```java
-import java.util.concurrent.CompletableFuture
-
-public interface Processor<MessageType> {
-  CompletableFuture<Void> process(MessageType message);
-}
-```
-
-Following the example from the previous section, we would use a `Processor<Message>` to handle instances of class `Message`.
-
-#### Producing and Consuming Kafka Messages
-
-Classes `Producer` and `Consumer` provide wrappers around underlying Kafka producers and consumers. They can be used to commit messages to a Kafka log and consume them afterwards. Both classes have to be configured with either `ProducerSettings` or `ConsumerSettings`. These settings close over properties that are directly fed into the underlying Kafka [producer](https://kafka.apache.org/0100/documentation.html#producerconfigs) or [consumer](https://kafka.apache.org/0100/documentation.html#newconsumerconfigs) and set the contract for serializing messages by providing a `Codec` for both `Producer` and `Consumer`.
-
-The integration test `ProduceAndConsumeMessageIT` in module `kafkasampler-it` shows how to use a producer and a consumer that share the same `Codec`.
 
 ## License
  
