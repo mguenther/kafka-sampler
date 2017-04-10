@@ -1,12 +1,17 @@
-# Building a Streaming Architecture with Apache Kafka
+# Building Streaming Applications with Apache Kafka
 
-This repository showcases how to build a streaming architecture using Apache Kafka and a variety of other tools and libraries that fit well with Kafka. 
+This repository showcases how to build streaming applications using Apache Kafka and a variety of other tools and libraries that are a good fit for a Kafka-based application. 
 
-The example application focuses around sentiment analysis and analyzes a tweet stream obtained from Twitter. Raw tweets have to be processed and enriched over multiple filters until they can be properly analyzed. Apache Kafka is at the heart of this data pipeline, connecting filters using Kafka Streams.
+This repository is structured into several smaller modules, each highlighting a different aspect of a Kafka-based application.
 
-The following diagram shows the overall architecture of the implemented system.
-
-![Overview](doc/overview.jpg)
+| Module                               | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kafkasampler-elasticsearch-adapter` | Provides a small and simple adapter for Elasticsearch. The example application in `kafkasampler-tweet-processing` makes use of this adapter to push analyzed data records in to a dedicated index.                                                                                                                                                                                                                                                                       |
+| kafkasampler-it                      | Hosts integration tests.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `kafkasampler-kafka-adapter`         | Provides a couple of useful abstractions that ease the integration of the client-side API of Apache Kafka.                                                                                                                                                                                                                                                                                                                                                               |
+| `kafkasampler-kafka-clients`         | Provides client APIs for cluster management (e.g. topic management).                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `kafkasampler-streams-examples`      | Demonstrates the usage of Kafka Streams over the course of a couple of small applications.                                                                                                                                                                                                                                                                                                                                                                               |
+| `kafkasampler-tweet-processing`      | A complete example application that conducts a sentiment analysis on Twitter tweets. Tweets are obtained in their raw from from Twitter and written to a dedicated Kafka topic. These raw data records are transformed and enriched across multiple filters before they are fed back into an Elasticsearch index for further visualization using Kibana. Apache Kafka is at the heart of this data pipeline, connecting filters as stream processors using Kafka Streams.|
 
 ## Prerequisites
 
@@ -49,7 +54,7 @@ $ docker-compose scale kafka=1   # scales down to 1 Kafka broker after the previ
 
 After changing the number of Kafka brokers, give the cluster some time so that all brokers can finish their cluster-join procedure. This should complete in a couple of seconds and you can inspect the output of the resp. Docker containers just to be sure that everything is fine. Kafka Manager should also reflect the change in the number of Kafka brokers after they successfully joined the cluster.
 
-### Running the Twitter Sentiment Analysis Example Application
+### Twitter Sentiment Analysis Example Application
 
 The example application also requires a locally running Elasticsearch and a Kibana to visualize the data. Use the `docker-compose` script `with-search.yml` to fire up all systems required. Starting up Kafka, ZooKeeper, Elasticsearch and Kibana might take a couple of seconds. After that, run the `TweetProcessingApplication`.
 
@@ -113,6 +118,10 @@ Date: Wed, 08 Mar 2017 19:05:36 GMT
 ```
 
 which tells you that the ingestion feed has been successfully terminated. Switching back to your application logs, you should see that Kafka Streams still processes the bulk of messages that has already been emitted to the resp. Kafka topic. Shortly after that, ingestion should stop as there is no new data available.
+
+### Kafka Streams Demo
+
+Module `kafkasampler-streams-examples` hosts a couple of small programs that demonstrate different uses of Kafka Streams high-level DSL. All programs require a working Kafka cluster consisting of at least one broker and one ZooKeeper instance. Use the default `docker-compose` script to fire up all required systems before executing any of the provided examples.
 
 ## On Application Architecture
 
