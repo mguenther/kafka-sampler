@@ -26,6 +26,7 @@
         <module>kafkasampler-it</module>
         <module>kafkasampler-tweet-processing</module>
         <module>kafkasampler-elasticsearch-adapter</module>
+        <module>kafkasampler-streams-examples</module>
     </modules>
 
     <properties>
