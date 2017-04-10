@@ -46,7 +46,6 @@ public class TimeWindowAggregationDemo {
 
         KGroupedStream<String, AdvertisementClicked> clicksPerAdvertisement = advertisementClickedStream
                 .mapValues(AdvertisementClicked::fromJson)
-                //.foreach((k, v) -> log.info(v.toString()))
                 .groupByKey();
         KTable<String, Advertisement> advertisements = builder
                 .table(Serdes.String(), Serdes.String(), TOPIC_AD_DETAILS, "advertisements")

@@ -14,13 +14,7 @@ import java.util.List;
 public class ClickGenerator {
 
     public static void main(String[] args) throws Exception {
-        //bootstrapAdvertisements();
         generateClickEvents();
-    }
-
-    private static void bootstrapAdvertisements() {
-        final Producer<Advertisement, String> producer = new Producer<>(Naming.PRODUCER_ID, ProducerSettings.usingDefaults(new JsonCodec<>(Advertisement.class)));
-        ADVERTISEMENTS.forEach(advertisement -> producer.log(Naming.TOPIC_AD_DETAILS, advertisement.getAdvertisementId(), advertisement));
     }
 
     private static void generateClickEvents() throws Exception {
