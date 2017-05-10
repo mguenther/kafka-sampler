@@ -1,0 +1,187 @@
+@startuml
+
+package api {
+
+    class ItemsResource {
+        +createItem(payload: CreateItemRequest): Response
+        +list(): Response
+    }
+
+    class ItemResource {
+        +list(id: String): Response
+        +createItem(payload: CreateItemRequest): Response
+        +updateItem(id: String, payload: UpdateItemRequest): Response
+        +concludeItem(id: String): Response
+    }
+}
+
+interface EventReceiver {
+    +onEvent(event: ItemEvent): CompletableFuture[Void]
+}
+
+interface CommandHandler {
+    +onCommand(command: ItemCommand): CompletableFuture[Void]
+}
+
+interface ItemView {
+    +getItems(): CompletableFuture[List[Item]]
+    +getItem(id: String): CompletableFuture[Optional[Item]]
+}
+
+class ItemManager {
+
+    -items: ConcurrentHashMap[String, Item]
+}
+
+ItemManager ..|> CommandHandler
+ItemManager ..|> EventReceiver
+ItemManager ..|> ItemView
+
+class ItemEventProducer {
+    +emit(event: ItemEvent): void
+}
+
+class ItemEventConsumer
+
+ItemEventConsumer --|> ReliableConsumer
+ItemManager ..> ItemEventProducer
+
+package domain {
+
+    class Item {
+
+        -id: String
+        -description: String
+        -requiredTime: Integer
+        -dueDate: Long
+        -tags: List[String]
+        -associatedList: List
+        -done: Boolean
+
+        +addTag(tag: String): Item
+        +removeTag(tag: String): Item
+        +assignDueDate(dueDate: Long): Item
+        +assignRequiredTime(requiredTime: Integer): Item
+        +conclude(): Item
+        +moveItemToList(): Item
+    }
+
+    enum List {
+
+        INBOX,
+        TODO,
+        REFERENCE,
+        SOMEDAY,
+        TICKLER
+    }
+
+    package commands {
+
+        class ItemCommand {
+            -id: String
+            +getId(): String
+        }
+
+        class CreateItem {
+            -id: String
+            -description: String
+        }
+
+        class ConcludeItem {
+            -id: String
+        }
+
+        class AssignRequiredTime {
+            -id: String
+            -requiredTime: Integer
+        }
+
+        class AssignDueDate {
+            -id: String
+            -dueDate: Long
+        }
+
+        class AssignTag {
+            -id: String
+            -tag: String
+        }
+
+        class RemoveTag {
+            -id: String
+            -tag: String
+        }
+
+        class MoveItemToList {
+            -id: String
+            -list: List
+        }
+
+    }
+
+    package events {
+
+        class ItemEvent {
+            -id: String
+        }
+
+        class ItemCreated {
+            -id: String
+            -description: String
+        }
+
+        class ItemConcluded {
+            -id: String
+        }
+
+        class RequiredTimeAssigned {
+            -id: String
+            -requiredTime: Integer
+        }
+
+        class DueDateAssigned {
+            -id: String
+            -dueDate: Long
+        }
+
+        class TagAssigned {
+            -id: String
+            -tag: String
+        }
+
+        class TagRemoved {
+            -id: String
+            -tag: String
+        }
+
+        class ItemMovedToList {
+            -id: String
+            -list: List
+        }
+    }
+}
+
+ItemsResource ..> ItemManager
+ItemResource ..> ItemManager
+
+ItemManager *- Item
+ItemManager ..> ItemCommand
+ItemManager ..> ItemEvent
+Item ..> List
+
+CreateItem --|> ItemCommand
+ConcludeItem --|> ItemCommand
+AssignRequiredTime --|> ItemCommand
+AssignDueDate --|> ItemCommand
+AssignTag --|> ItemCommand
+RemoveTag --|> ItemCommand
+MoveItemToList --|> ItemCommand
+
+ItemCreated --|> ItemEvent
+ItemConcluded --|> ItemEvent
+RequiredTimeAssigned --|> ItemEvent
+DueDateAssigned --|> ItemEvent
+TagAssigned --|> ItemEvent
+TagRemoved --|> ItemEvent
+ItemMovedToList --|> ItemEvent
+
+@enduml
