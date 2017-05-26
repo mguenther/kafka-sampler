@@ -11,10 +11,10 @@
         <version>0.6.0</version>
     </parent>
 
-    <artifactId>kafkasampler-tweet-processing</artifactId>
+    <artifactId>kafkasampler-eventsourced-gtd</artifactId>
     <version>0.6.0</version>
 
-    <name>[kafka-sampler] Tweet Processing</name>
+    <name>[kafka-sampler] Eventsourced Getting Things Done</name>
 
     <url>http://mguenther.net</url>
 
@@ -28,21 +28,39 @@
                         <annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor
                         </annotationProcessor>
                     </annotationProcessors>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>${avro.version}</version>
+                <executions>
+                    <execution>
+                        <id>schemas</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>schema</goal>
+                            <goal>protocol</goal>
+                            <goal>idl-protocol</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
+                            <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+                            <stringType>String</stringType>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
 
     <dependencies>
-        <!-- Internal -->
+        <!-- Intra-project dependencies -->
         <dependency>
             <groupId>net.mguenther.kafkasampler</groupId>
             <artifactId>kafkasampler-kafka-adapter</artifactId>
-            <version>0.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.mguenther.kafkasampler</groupId>
-            <artifactId>kafkasampler-elasticsearch-adapter</artifactId>
             <version>0.6.0</version>
         </dependency>
         <!-- Spring Boot -->
@@ -63,35 +81,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        <!-- Kafka -->
+        <!-- Avro -->
         <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-streams</artifactId>
-            <version>${kafka.version}</version>
-        </dependency>
-        <!-- Twitter Integration -->
-        <dependency>
-            <groupId>org.twitter4j</groupId>
-            <artifactId>twitter4j-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.twitter4j</groupId>
-            <artifactId>twitter4j-stream</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.reactivex</groupId>
-            <artifactId>rxjava</artifactId>
-        </dependency>
-        <!-- Stanford Core NLP -->
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>${stanford.corenlp.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.washington.cs.knowitall.stanford-corenlp</groupId>
-            <artifactId>stanford-parse-models</artifactId>
-            <version>${stanford.models.version}</version>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
         </dependency>
         <!-- Utilities -->
         <dependency>
@@ -99,36 +92,11 @@
             <artifactId>lombok</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-        <!-- Logging -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-jcl</artifactId>
-        </dependency>
-        <!-- Testing -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-        </dependency>
-        <dependency>
+            <!-- Testing -->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

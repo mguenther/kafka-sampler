@@ -1,0 +1,74 @@
+{
+    "namespace": "net.mguenther.kafkasampler.gtd.persistence.serialization",
+    "type": "record",
+    "name": "Event",
+    "fields": [
+        {"name": "eventId", "type": "string"},
+        {"name": "timestamp", "type": "long"},
+        {"name": "data", "type": [
+
+            {
+                "name": "ItemCreated",
+                "type": "record",
+                "fields": [
+                    {"name": "itemId", "type": "string"},
+                    {"name": "description", "type": "string"}
+                ]
+            },
+
+            {
+                "name": "ItemConcluded",
+                "type": "record",
+                "fields": [
+                    {"name": "itemId", "type": "string"}
+                ]
+            },
+
+            {
+                "name": "RequiredTimeAssigned",
+                "type": "record",
+                "fields": [
+                    {"name": "itemId", "type": "string"},
+                    {"name": "requiredTime", "type": "int"}
+                ]
+            },
+
+            {
+                "name": "DueDateAssigned",
+                "type": "record",
+                "fields": [
+                    {"name": "itemId", "type": "string"},
+                    {"name": "dueDate", "type": "long"}
+                ]
+            },
+
+            {
+                "name": "TagAssigned",
+                "type": "record",
+                "fields": [
+                    {"name": "itemId", "type": "string"},
+                    {"name": "tag", "type": "string"}
+                ]
+            },
+
+            {
+                "name": "TagRemoved",
+                "type": "record",
+                "fields": [
+                    {"name": "itemId", "type": "string"},
+                    {"name": "tag", "type": "string"}
+                ]
+            },
+
+            {
+                "name": "ItemMovedToList",
+                "type": "record",
+                "fields": [
+                    {"name": "itemId", "type": "string"},
+                    {"name": "list", "type": "string"}
+                ]
+            }
+        ]
+        }
+    ]
+}
