@@ -1,0 +1,5 @@
+gtd:
+  applicationName: gtd
+  topic: kafkasampler-gtd-events
+  zookeeperUrl: localhost:2181
+  brokerUrl: localhost:9092
