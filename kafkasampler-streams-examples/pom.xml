@@ -8,11 +8,11 @@
     <parent>
         <groupId>net.mguenther.kafkasampler</groupId>
         <artifactId>kafkasampler-parent</artifactId>
-        <version>0.5.0</version>
+        <version>0.6.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>kafkasampler-streams-examples</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0-SNAPSHOT</version>
 
     <name>[kafka-sampler] Streams Examples</name>
 
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>net.mguenther.kafkasampler</groupId>
             <artifactId>kafkasampler-kafka-adapter</artifactId>
-            <version>0.5.0</version>
+            <version>0.6.0-SNAPSHOT</version>
         </dependency>
         <!-- Spring Boot -->
         <dependency>
