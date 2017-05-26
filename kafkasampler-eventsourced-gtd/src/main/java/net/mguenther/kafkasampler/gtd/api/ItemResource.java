@@ -12,6 +12,7 @@ import net.mguenther.kafkasampler.gtd.domain.commands.ItemCommand;
 import net.mguenther.kafkasampler.gtd.domain.commands.MoveItemToList;
 import net.mguenther.kafkasampler.gtd.domain.commands.RemoveTag;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -32,12 +33,17 @@ import java.util.stream.Collectors;
 /**
  * @author Markus Günther (markus.guenther@gmail.com)
  */
-@RequiredArgsConstructor
 @Path("items/{itemId}")
 public class ItemResource {
 
     private final ItemView itemView;
     private final CommandHandler commandHandler;
+
+    @Inject
+    public ItemResource(final ItemView itemView, final CommandHandler commandHandler) {
+        this.itemView = itemView;
+        this.commandHandler = commandHandler;
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -59,7 +65,7 @@ public class ItemResource {
                 .thenApply(optionalItem -> optionalItem.flatMap(item -> commandsFor(item, updateItem)))
                 .thenApply(optionalCommands -> optionalCommands.orElse(Collections.emptyList()))
                 .thenCompose(commandHandler::onCommand)
-                .thenApply(dontcare -> asyncResponse.resume(Response.ok().build()))
+                .thenApply(dontcare -> asyncResponse.resume(Response.accepted().build()))
                 .exceptionally(e -> asyncResponse.resume(Response.status(500).entity(e).build()));
     }
 
@@ -70,7 +76,7 @@ public class ItemResource {
 
         commandHandler
                 .onCommand(new ConcludeItem(itemId))
-                .thenApply(dontCare -> asyncResponse.resume(Response.ok().build()))
+                .thenApply(dontCare -> asyncResponse.resume(Response.accepted().build()))
                 .exceptionally(e -> asyncResponse.resume(Response.status(500).entity(e).build()));
     }
 

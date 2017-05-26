@@ -47,7 +47,7 @@ public class ItemsResource {
 
         commandHandler
                 .onCommand(commandsFor(payload))
-                .thenApply(dontCare -> asyncResponse.resume(Response.ok().build()))
+                .thenApply(dontCare -> asyncResponse.resume(Response.accepted().build()))
                 .exceptionally(e -> asyncResponse.resume(Response.status(500).entity(e).build()));
     }
 
