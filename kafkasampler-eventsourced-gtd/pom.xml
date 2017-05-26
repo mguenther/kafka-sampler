@@ -8,11 +8,11 @@
     <parent>
         <groupId>net.mguenther.kafkasampler</groupId>
         <artifactId>kafkasampler-parent</artifactId>
-        <version>0.5.0</version>
+        <version>0.6.0</version>
     </parent>
 
     <artifactId>kafkasampler-eventsourced-gtd</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
 
     <name>[kafka-sampler] Eventsourced Getting Things Done</name>
 
@@ -61,7 +61,7 @@
         <dependency>
             <groupId>net.mguenther.kafkasampler</groupId>
             <artifactId>kafkasampler-kafka-adapter</artifactId>
-            <version>0.5.0</version>
+            <version>0.6.0</version>
         </dependency>
         <!-- Spring Boot -->
         <dependency>
